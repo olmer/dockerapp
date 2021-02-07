@@ -1,7 +1,7 @@
 version: 2
 jobs:
   build:
-    working_directory: /dockerapp
+    working_directory: /olmerdockerapp
     docker:
       - image: docker:17.05.0-ce-git
     steps:
@@ -17,3 +17,11 @@ jobs:
           command: |
             docker-compose up -d
             docker-compose run dockerapp python test.py
+      - deploy:
+          name: Push docker image
+          command: |
+            docker login -e $DOCKER_HUB_EMAIL -u $DOCKER_HUB_USER_ID -p $DOCKER_HUB_PWD
+            docker tag olmerdockerapp_dockerapp $DOCKER_HUB_USER_ID/dockerapp:$CIRCLE_SHA1
+            docker tag olmerdockerapp_dockerapp $DOCKER_HUB_USER_ID/dockerapp:latest
+            docker push $DOCKER_HUB_USER_ID/dockerapp:$CIRCLE_SHA1
+            docker push $DOCKER_HUB_USER_ID/dockerapp:latest
